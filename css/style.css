@@ -72,12 +72,15 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
+  overflow-x: hidden;
+  overflow-x: clip;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "SF Pro Text",
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   font-size: 16px;
@@ -180,12 +183,14 @@ a { color: inherit; text-decoration: none; }
 
 /* ------------------------------------------------------------ 视图切换 */
 .view { display: none; }
-.view.is-active {
-  display: block;
-  animation: viewIn 0.5s var(--ease-out) both;
+.view.is-active { display: block; }
+/* 进场动画单独用一个类：动画结束后必须摘掉，
+   否则 transform 关键帧会让内部 position:fixed 元素改以本元素为包含块 */
+.view.is-active.is-enter {
+  animation: viewIn 0.45s var(--ease-out) both;
 }
 @keyframes viewIn {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: none; }
 }
 
@@ -206,7 +211,7 @@ main {
   position: absolute;
   top: -160px;
   left: 50%;
-  width: 820px;
+  width: min(820px, 110vw);
   height: 460px;
   transform: translateX(-50%);
   background: radial-gradient(ellipse at center,
@@ -462,7 +467,7 @@ main {
   align-items: center;
   gap: 10px;
   padding: 12px 0 10px;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: saturate(180%) blur(18px);
   -webkit-backdrop-filter: saturate(180%) blur(18px);
 }
@@ -670,7 +675,7 @@ main {
   gap: 10px;
   justify-content: center;
   padding: 12px 22px calc(12px + env(safe-area-inset-bottom));
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: 1px solid var(--line);
@@ -685,7 +690,7 @@ main {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  background: color-mix(in srgb, var(--bg) 48%, transparent);
   backdrop-filter: blur(26px) saturate(160%);
   -webkit-backdrop-filter: blur(26px) saturate(160%);
   opacity: 0;
@@ -786,6 +791,11 @@ main {
   line-height: 1;
 }
 .ring-num .pct { font-size: 17px; font-weight: 560; color: var(--ink-3); margin-left: 2px; }
+.ring-num.pop { animation: popIn 0.65s var(--ease-out); }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.84); }
+  to { opacity: 1; transform: none; }
+}
 .ring-cap { font-size: 11.5px; color: var(--ink-3); margin-top: 6px; letter-spacing: 0.04em; }
 
 .result-meta { flex: 1; min-width: 0; }
@@ -995,8 +1005,8 @@ main {
 .chart {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  height: 108px;
+  gap: 8px;
+  height: 116px;
 }
 .bar-col {
   flex: 1;
@@ -1010,7 +1020,7 @@ main {
 }
 .bar {
   width: 100%;
-  max-width: 26px;
+  max-width: 40px;
   border-radius: 6px;
   background: linear-gradient(to top, var(--accent-ring), var(--accent));
   transform-origin: bottom;
@@ -1282,6 +1292,7 @@ main {
 .sheet-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .dot.done { background: var(--ink); }
+.sheet-legend .dot.cur { background: var(--accent); }
 .dot.cur { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .dot.todo { background: var(--line-strong); }
 
@@ -1309,12 +1320,17 @@ main {
 }
 .sheet-cell:hover { background: var(--line); }
 .sheet-cell:active { transform: scale(0.94); }
-.sheet-cell.is-done { background: var(--surface-2); color: var(--ink); border-color: var(--line-strong); }
+.sheet-cell.is-done {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
 .sheet-cell.is-cur {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
   border-color: var(--accent);
   font-weight: 640;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 /* ------------------------------------------------------------ 对话框 */
@@ -1431,11 +1447,27 @@ main {
   .rec-del { opacity: 1; }
 }
 
+@media (max-width: 480px) {
+  .cat-desc {
+    max-width: 52%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .hero-title { font-size: clamp(30px, 9vw, 40px); }
+  .result-cells { grid-template-columns: repeat(2, 1fr); row-gap: 14px; }
+  .chart { height: 88px; }
+  .bar-x { font-size: 9px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
 

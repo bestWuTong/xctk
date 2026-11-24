@@ -39,8 +39,8 @@
     var h = Math.floor(t / 3600);
     var m = Math.floor((t % 3600) / 60);
     var s = t % 60;
-    var mm = (h ? String(m).padStart(2, '0') : String(m)) + ':' + String(s).padStart(2, '0');
-    return h ? h + ':' + mm : mm;
+    var body = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    return h ? h + ':' + body : body;
   }
 
   /** 1分20秒 / 45秒 */
@@ -125,14 +125,18 @@
   }
 
   /* ------------------------------------------------------------ 视图 */
-  var current = 'home';
+  var current = null;
 
   function show(name) {
     if (current === name) return;
-    $$('.view').forEach(function (v) { v.classList.remove('is-active'); });
+    $$('.view').forEach(function (v) {
+      v.classList.remove('is-active', 'is-enter');
+    });
     var v = $('#view-' + name);
     if (!v) return;
-    v.classList.add('is-active');
+    v.classList.add('is-active', 'is-enter');
+    /* 动画结束就摘掉，避免 transform 关键帧把 fixed 子元素钉在本元素上 */
+    setTimeout(function () { v.classList.remove('is-enter'); }, 520);
     current = name;
     $$('.nav-link').forEach(function (b) {
       b.classList.toggle('is-active', b.dataset.nav === name);
@@ -340,7 +344,7 @@
     if (!initial) card.classList.add('swap');
 
     $('#q-no').textContent = q.n;
-    $('#q-tag').textContent = '第 ' + (quiz.idx + 1) + ' 题';
+    $('#q-tag').textContent = CATS[u.cat] ? CATS[u.cat].name : '单选题';
 
     $('#q-stem').textContent = q.s;
 
@@ -494,11 +498,9 @@
     if (acc < 0.6) ring.classList.add('is-low');
     else if (acc < 0.8) ring.classList.add('is-mid');
     ring.style.strokeDashoffset = C;
-    requestAnimationFrame(function () {
-      setTimeout(function () {
-        ring.style.strokeDashoffset = String(C * (1 - acc));
-      }, 60);
-    });
+    /* 强制一次布局，让上面的起点真正生效，再设终值触发过渡 */
+    void ring.getBoundingClientRect();
+    ring.style.strokeDashoffset = String(C * (1 - acc));
 
     $$('#result-filter .seg-item').forEach(function (b) {
       b.classList.toggle('is-active', b.dataset.filter === 'all');
@@ -532,15 +534,12 @@
     }, 1600);
   }
 
+  /** 直接写入最终值，再用一次极短的缩放入场——不依赖 rAF，任何环境下都不会显示错数 */
   function countUp(node, target, dur, suffix) {
-    var start = performance.now();
-    function step(t) {
-      var p = Math.min(1, (t - start) / dur);
-      var eased = 1 - Math.pow(1 - p, 3);
-      node.innerHTML = Math.round(target * eased) + '<span class="pct">' + (suffix || '') + '</span>';
-      if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+    node.innerHTML = target + '<span class="pct">' + (suffix || '') + '</span>';
+    node.classList.remove('pop');
+    void node.offsetWidth;
+    node.classList.add('pop');
   }
 
   function renderReview() {
@@ -677,9 +676,10 @@
         var bar = el('div', 'bar');
         bar.style.height = Math.max(4, Math.round(acc * 100)) + '%';
         if (acc < 0.6) bar.classList.add('is-low');
-        bar.title = r.unitTitle + ' · ' + pct(acc) + '%';
+        bar.title = r.unitTitle + ' · ' + pct(acc) + '% · ' + fmtClock(r.ms);
         col.appendChild(bar);
-        col.appendChild(el('div', 'bar-x', fmtClock(r.ms)));
+        var d = new Date(r.at);
+        col.appendChild(el('div', 'bar-x', (d.getMonth() + 1) + '/' + d.getDate()));
         chart.appendChild(col);
       });
       var avg = recent.reduce(function (n, r) { return n + r.correct / (r.total || 1); }, 0) / recent.length;
@@ -1051,6 +1051,10 @@
         updateSyncUI();
       });
     }
+
+    /* 深链接：?u=zz-1 直接开始某一套 */
+    var m = /[?&]u=([\w-]+)/.exec(location.search);
+    if (m && UNITS[m[1]]) startQuiz(UNITS[m[1]]);
   }
 
   if (document.readyState === 'loading') {

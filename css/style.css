@@ -203,7 +203,7 @@ main {
 /* ------------------------------------------------------------ 首页 */
 .hero {
   position: relative;
-  padding: 64px 0 44px;
+  padding: 46px 0 28px;
 }
 /* 极淡的顶部光晕，撑起页面纵深 */
 .hero::before {
@@ -244,7 +244,7 @@ main {
 }
 
 .stat-row {
-  margin-top: 40px;
+  margin-top: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1424,7 +1424,7 @@ main {
 @media (max-width: 720px) {
   main { padding: 0 18px calc(80px + env(safe-area-inset-bottom)); }
   .nav-inner { padding: 0 18px; }
-  .hero { padding: 44px 0 32px; }
+  .hero { padding: 30px 0 20px; }
   .hero-sub { font-size: 15.5px; }
   .br-mobile { display: inline; }
   .stat-num { font-size: 22px; }

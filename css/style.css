@@ -1005,11 +1005,13 @@ main {
 .chart {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
   height: 116px;
 }
 .bar-col {
-  flex: 1;
+  flex: 1 1 0;
+  max-width: 48px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

@@ -710,7 +710,10 @@
     score.innerHTML = '<b>' + pct(acc) + '</b><span>%</span>';
 
     var main = el('div', 'rec-main');
-    main.appendChild(el('div', 'rec-title', r.unitTitle || '练习'));
+    var unit = UNITS[r.unit];
+    var shortName = (unit && unit.short) ? unit.short : (r.unitTitle || '练习');
+    var prefix = r.catName ? r.catName + ' · ' : '';
+    main.appendChild(el('div', 'rec-title', prefix + shortName));
     var meta = el('div', 'rec-meta');
     meta.appendChild(el('span', null, fmtDate(r.at)));
     meta.appendChild(el('span', null, '·'));

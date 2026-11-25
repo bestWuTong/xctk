@@ -673,11 +673,13 @@
         var acc = r.correct / (r.total || 1);
         var col = el('div', 'bar-col');
         col.style.setProperty('--i', i);
+        var track = el('div', 'bar-track');
         var bar = el('div', 'bar');
         bar.style.height = Math.max(4, Math.round(acc * 100)) + '%';
         if (acc < 0.6) bar.classList.add('is-low');
         bar.title = r.unitTitle + ' · ' + pct(acc) + '% · ' + fmtClock(r.ms);
-        col.appendChild(bar);
+        track.appendChild(bar);
+        col.appendChild(track);
         var d = new Date(r.at);
         col.appendChild(el('div', 'bar-x', (d.getMonth() + 1) + '/' + d.getDate()));
         chart.appendChild(col);
@@ -711,9 +713,9 @@
 
     var main = el('div', 'rec-main');
     var unit = UNITS[r.unit];
-    var shortName = (unit && unit.short) ? unit.short : (r.unitTitle || '练习');
-    var prefix = r.catName ? r.catName + ' · ' : '';
-    main.appendChild(el('div', 'rec-title', prefix + shortName));
+    /* 政治理论下有小黑、超格两套资料，标题用完整书名才不会混 */
+    var fullName = (unit && unit.title) ? unit.title : (r.unitTitle || '练习');
+    main.appendChild(el('div', 'rec-title', fullName));
     var meta = el('div', 'rec-meta');
     meta.appendChild(el('span', null, fmtDate(r.at)));
     meta.appendChild(el('span', null, '·'));

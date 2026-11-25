@@ -415,7 +415,8 @@ main {
   -webkit-tap-highlight-color: transparent;
 }
 .btn:active { transform: scale(0.965); }
-.btn:disabled { opacity: 0.42; pointer-events: none; }
+.btn:disabled { opacity: 0.55; pointer-events: none; }
+.btn-ghost:disabled { background: var(--bg-soft); border-color: var(--line); color: var(--ink-3); }
 
 .btn-primary {
   background: var(--accent);
@@ -1014,11 +1015,17 @@ main {
   max-width: 48px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
   gap: 7px;
   height: 100%;
   min-width: 0;
+}
+/* 单独一层轨道：柱子高度按轨道算，不会被轴标签挤偏 */
+.bar-track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 .bar {
   width: 100%;

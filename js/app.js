@@ -620,7 +620,7 @@
       exp.textContent = q.e;
       pad.appendChild(exp);
     } else {
-      pad.appendChild(el('div', 'rv-exp', '暂无解析。'));
+      pad.appendChild(el('div', 'rv-exp', '这份资料只提供了答案，没有逐题解析。'));
     }
 
     inner.appendChild(pad);

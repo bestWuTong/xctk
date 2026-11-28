@@ -168,6 +168,8 @@
     return { last: last, wrong: wrong, times: times };
   }
 
+  var GROUP_LABELS = { sprint: '冲刺专项' };
+
   function renderHome() {
     renderStats();
     var host = $('#cat-list');
@@ -184,25 +186,43 @@
       head.appendChild(el('span', 'cat-desc', cat.desc + ' · 已练 ' + done + '/' + units.length));
       sec.appendChild(head);
 
-      var grid = el('div', 'unit-grid');
-      units.forEach(function (u, i) {
-        grid.appendChild(unitCard(u, i));
+      /* 套卷和冲刺专项分组展示，编号在全分类内连续 */
+      var main = units.filter(function (u) { return !u.group; });
+      var groups = [];
+      var order = [];
+      units.forEach(function (u) {
+        if (!u.group) return;
+        if (!groups[u.group]) { groups[u.group] = []; order.push(u.group); }
+        groups[u.group].push(u);
       });
-      sec.appendChild(grid);
+
+      var seq = 1;
+      function grid(items) {
+        var g = el('div', 'unit-grid');
+        items.forEach(function (u) { g.appendChild(unitCard(u, seq++)); });
+        return g;
+      }
+
+      if (main.length) sec.appendChild(grid(main));
+      order.forEach(function (key) {
+        sec.appendChild(el('div', 'group-head', GROUP_LABELS[key] || key));
+        sec.appendChild(grid(groups[key]));
+      });
+
       host.appendChild(sec);
     });
   }
 
-  function unitCard(u, i) {
+  function unitCard(u, num) {
     var s = unitSummary(u);
     var card = el('div', 'unit-card');
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.style.animation = 'revealIn .7s var(--ease-out) both';
-    card.style.animationDelay = (i * 55) + 'ms';
+    card.style.animationDelay = Math.min(num, 12) * 45 + 'ms';
 
     var top = el('div', 'uc-top');
-    top.appendChild(el('span', 'uc-index', String(i + 1).padStart(2, '0')));
+    top.appendChild(el('span', 'uc-index', String(num).padStart(2, '0')));
     var badge;
     if (s.wrong) badge = el('span', 'uc-badge is-wrong', '错题 ' + s.wrong);
     else if (s.last) badge = el('span', 'uc-badge is-done', '正确率 ' + pct(s.last.correct / (s.last.total || 1)) + '%');
